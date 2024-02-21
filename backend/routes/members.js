@@ -13,6 +13,9 @@ router.get('/', async function(req, res, next) {
     try {
         const {members} = await client.organizations.members.search({
             organization_ids: [organization.organization_id]
+        },
+        {
+          authorization: { session_jwt: req.session_jwt },
         });
     
         return res.json({ success: true, members });

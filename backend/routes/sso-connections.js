@@ -14,6 +14,9 @@ router.get('/', async function(req, res, next) {
         {
           organization_id: organization.organization_id,
         },
+        {
+          authorization: { session_jwt: req.session_jwt },
+        }
       );
     
       if (saml_connections) {
@@ -32,6 +35,9 @@ router.post('/', async function(req, res, next) {
           organization_id: organization.organization_id,
           display_name: body.display_name,
         },
+        {
+          authorization: { session_jwt: req.session_jwt },
+        }
       );
     
       if (connection) {
@@ -60,6 +66,9 @@ router.put('/', async function(req, res, next) {
             organization_id: organization.organization_id,
             ...body,
         },
+        {
+          authorization: { session_jwt: req.session_jwt },
+        }
     );
 
     return res.json({ connection });

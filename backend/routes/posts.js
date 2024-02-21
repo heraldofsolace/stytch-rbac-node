@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { client, authenticate } = require('../lib/stytch-client');
+const { client, authenticate, authorize } = require('../lib/stytch-client');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -8,7 +8,15 @@ const prisma = new PrismaClient();
 router.use(authenticate);
 
 router.get('/', async function(req, res, next) {
-    const { organization } = req;
+    const { organization, session_jwt } = req;
+    const { authorized } = await authorize(session_jwt, {
+        organization_id: organization.organization_id,
+        resource_id: 'post',
+        action: 'read',
+    });
+
+    if(!authorized) return res.status(403).json({ success: false, message: 'Unauthorized' });
+
     const posts = await prisma.post.findMany({
         where: {
             organization: organization.organization_id
@@ -18,7 +26,15 @@ router.get('/', async function(req, res, next) {
 });
 
 router.post('/', async function(req, res, next) {
-    const { member, organization } = req;
+    const { member, organization, session_jwt } = req;
+    
+    const { authorized } = await authorize(session_jwt, {
+        organization_id: organization.organization_id,
+        resource_id: 'post',
+        action: 'create',
+    });
+
+    if(!authorized) return res.status(403).json({ success: false, message: 'Unauthorized' });
 
     const data = req.body;
     const post = await prisma.post.create({
@@ -35,7 +51,15 @@ router.post('/', async function(req, res, next) {
 
 router.get('/:id', async function(req, res, next) {
     const { id } = req.params;
-    const { organization } = req;
+    const { organization, session_jwt } = req;
+    
+    const { authorized } = await authorize(session_jwt, {
+        organization_id: organization.organization_id,
+        resource_id: 'post',
+        action: 'read',
+    });
+
+    if(!authorized) return res.status(403).json({ success: false, message: 'Unauthorized' });
 
     const post = await prisma.post.findUnique({
         where: {
@@ -49,7 +73,16 @@ router.get('/:id', async function(req, res, next) {
 
 router.put('/:id', async function(req, res, next) {
     const { id } = req.params;
-    const { organization } = req;
+    const { organization, session_jwt } = req;
+
+    const { authorized } = await authorize(session_jwt, {
+        organization_id: organization.organization_id,
+        resource_id: 'post',
+        action: 'update',
+    });
+
+    if(!authorized) return res.status(403).json({ success: false, message: 'Unauthorized' });
+
     const data = req.body;
 
     const post = await prisma.post.update({
@@ -65,7 +98,16 @@ router.put('/:id', async function(req, res, next) {
 
 router.delete('/:id', async function(req, res, next) {
     const { id } = req.params;
-    const { organization } = req;
+    const { organization, session_jwt } = req;
+
+    const { authorized } = await authorize(session_jwt, {
+        organization_id: organization.organization_id,
+        resource_id: 'post',
+        action: 'delete',
+    });
+
+    if(!authorized) return res.status(403).json({ success: false, message: 'Unauthorized' });
+
 
     await prisma.post.delete({
         where: {

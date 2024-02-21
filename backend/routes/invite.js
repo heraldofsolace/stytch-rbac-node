@@ -12,7 +12,11 @@ router.post('/', async function(req, res, next) {
         await client.magicLinks.email.invite(
             {
                 organization_id: req.organization.organization_id,
-                email_address: body.email
+                email_address: body.email,
+                roles: body.roles
+            },
+            {
+              authorization: { session_jwt: req.session_jwt },
             }
         )
         return res.json({ success: true });

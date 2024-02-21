@@ -12,7 +12,6 @@ const client = new stytch.B2BClient({
 
 const authenticate = async function(req, res, next) {
   try {
-    console.log(req.cookies);
     const sessionData = getSession(req, res);
     if(sessionData.error) {
       return res.status(401).json({ error: "You need to log in" });
@@ -23,6 +22,7 @@ const authenticate = async function(req, res, next) {
 
     req.organization = organization;
     req.member = member;
+    req.session_jwt = session_jwt;
     setSession(req, res, session_jwt);
     next();
   } catch (err) {
@@ -31,7 +31,21 @@ const authenticate = async function(req, res, next) {
   }
 }
 
+const authorize = async function(jwt, authz_check) {
+  try {
+    await client.sessions.authenticate({
+      session_jwt: jwt,
+      authorization_check: authz_check
+    });
+    return { authorized: true }
+  } catch (err) {
+    console.error(err);
+    return { authorized: false }
+  }
+}
+
 module.exports = {
     client,
-    authenticate
+    authenticate,
+    authorize
 };

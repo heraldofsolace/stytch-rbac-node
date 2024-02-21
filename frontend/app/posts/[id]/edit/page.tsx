@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Post } from "@prisma/client";
 import { useStytchOrganization } from "@stytch/nextjs/b2b";
 import moment from "moment";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -24,13 +24,18 @@ const formSchema = z.object({
 export default function Post({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<Post>();
   const [loading, setLoading] = useState(true);
-
+  const router = useRouter();
   const { organization, isInitialized } = useStytchOrganization();
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
-      const { post } = await fetch(`http://localhost:5000/api/posts/${params.id}`, { credentials: 'include'}).then((res) => res.json());
-      setPost(post);
+      const { post, success, message } = await fetch(`http://localhost:5000/api/posts/${params.id}`, { credentials: 'include'}).then((res) => res.json());
+      if(success)
+        setPost(post);
+      else if (message === 'Unauthorized') {
+        alert("You're not allowed to view this post");
+        router.push(`/${organization?.organization_slug}/dashboard`);
+      }
       setLoading(false);
     };
 
@@ -54,8 +59,9 @@ export default function Post({ params }: { params: { id: string } }) {
       },
       body: JSON.stringify(values)
     });
+    if(response.status === 403) return alert('You are not allowed to update this post');
     const data = await response.json();
-    if(!data.success) return alert('Error creating post');
+    if(!data.success) return alert('Error updating post');
     setPost(data.post);
     window.location.href = `/posts/${params.id}`;
     form.reset();

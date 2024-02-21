@@ -40,8 +40,8 @@ export default async function DashboardPage({
           </span>
         </div>
       </div>
-      <SSOConnections organization={organization} />
-      <MembersList organization={organization} />
+      {member.is_admin && <SSOConnections organization={organization} />}
+      {member.is_admin && <MembersList organization={organization} />}
       <Posts organization={organization} />
     </Authenticated>
   );
