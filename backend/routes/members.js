@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { client, authenticate } = require('../lib/stytch-client');
 const { PrismaClient } = require('@prisma/client');
+const { revokeSession } = require('../lib/session-utils');
 
 const prisma = new PrismaClient();
 
@@ -20,6 +21,11 @@ router.get('/', async function(req, res, next) {
         return res.status(500).json({ success: false });
     }
 
+});
+
+router.delete('/logout', async function(req, res, next) {
+    await revokeSession(req, res, client);
+    return res.json({ success: true });
 });
 
 module.exports = router;

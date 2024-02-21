@@ -12,6 +12,7 @@ const client = new stytch.B2BClient({
 
 const authenticate = async function(req, res, next) {
   try {
+    console.log(req.cookies);
     const sessionData = getSession(req, res);
     if(sessionData.error) {
       return res.status(401).json({ error: "You need to log in" });
@@ -26,7 +27,7 @@ const authenticate = async function(req, res, next) {
     next();
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "An error occurred" });
+    return res.status(401).json({ error: "You need to log in" });
   }
 }
 

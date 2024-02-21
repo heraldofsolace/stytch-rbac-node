@@ -4,6 +4,7 @@ import MembersList from '@/components/members-list';
 import SSOConnections from '@/components/sso-connections';
 import Posts from '@/components/posts';
 import { getStytchCookie } from '@/lib/cookies';
+import { redirect } from 'next/navigation';
 
 export default async function DashboardPage({
   params,
@@ -11,9 +12,11 @@ export default async function DashboardPage({
   params: { slug: string };
 }) {
   const cookie = await getStytchCookie();
-  const response = await fetch("http://localhost:5000/api/organizations", { credentials: 'include', headers: { Cookie: `stytch_session_jwt=${cookie}` } });
-  const { organization, member } = await response.json();
-  console.log(organization);
+  const response = await fetch("http://localhost:5000/api/organizations", { credentials: 'include', headers: { Cookie: `stytch_session_jwt=${cookie};` } });
+  if(response.status === 401) {
+    return redirect('/login');
+  }
+  const { organization, member, success } = await response.json();
 
   return (
     <Authenticated>

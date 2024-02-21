@@ -7,6 +7,7 @@ import {
 import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from './ui/button';
+import { cookies } from 'next/headers';
 
 export default function Authenticated({ children }: { children: ReactNode }) {
   const { member, isInitialized: memberIsInitiated } = useStytchMember();
@@ -16,7 +17,10 @@ export default function Authenticated({ children }: { children: ReactNode }) {
   const router = useRouter();
   const authenticated = Boolean(member && session);
   const logout = async () => {
-    await stytch.session.revoke();
+    await fetch('http://localhost:5000/api/members/logout', {
+      method: 'DELETE',
+      credentials: 'include',
+    });
     router.push(`/login`);
   };
 
