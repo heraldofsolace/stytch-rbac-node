@@ -23,6 +23,7 @@ const authenticate = async function(req, res, next) {
 
     req.organization = organization;
     req.member = member;
+    req.session_jwt = session_jwt;
     setSession(req, res, session_jwt);
     next();
   } catch (err) {
